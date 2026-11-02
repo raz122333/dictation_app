@@ -1,0 +1,1253 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>הכתבות כיפיות</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Heebo -->
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Canvas Confetti for Success Animation -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        body {
+            font-family: 'Heebo', sans-serif;
+            background-color: #FDFBF7;
+            color: #2D3748;
+        }
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #F1EDE3;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #D4C9B4;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between selection:bg-amber-200">
+
+    <!-- Header -->
+    <header class="bg-white/85 backdrop-blur-md border-b border-amber-100 sticky top-0 z-50 shadow-sm">
+        <div class="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
+            <div class="flex items-center space-x-3 space-x-reverse">
+                <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-amber-400 to-orange-400 flex items-center justify-center text-white shadow-md shadow-amber-200">
+                    <i data-lucide="book-open" class="w-6 h-6"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold bg-gradient-to-r from-amber-700 to-orange-600 bg-clip-text text-transparent">הכתבות כיפיות</h1>
+                    <p class="text-xs text-stone-500">מתאמנים וכותבים באהבה</p>
+                </div>
+            </div>
+
+            <!-- Global Mode Switcher / Admin Button -->
+            <div class="flex items-center gap-2">
+                <button id="modeToggleBtn" onclick="toggleMode()" class="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all shadow-sm bg-amber-500 text-white hover:bg-amber-600">
+                    <i data-lucide="settings" class="w-4 h-4"></i>
+                    <span id="modeBtnText">מצב הורים (עריכה)</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="max-w-4xl mx-auto px-4 py-6 flex-grow w-full">
+
+        <!-- STUDENT VIEW -->
+        <div id="studentView" class="space-y-6">
+            <!-- Profile Selector Banner -->
+            <div class="bg-gradient-to-r from-amber-100/70 to-orange-100/70 p-6 rounded-3xl border border-amber-200/60 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div class="text-center sm:text-right">
+                    <span class="inline-block px-3 py-1 bg-amber-200/80 text-amber-900 text-xs font-bold rounded-full mb-2">זמן תרגול! 🌟</span>
+                    <h2 id="activeStudentTitle" class="text-2xl font-black text-amber-900">שלום!</h2>
+                    <p class="text-sm text-stone-600 mt-1">תרגלו את המילים, או היכנסו למצב מבחן לבדיקת הידע!</p>
+                </div>
+                <!-- Student Switch Tabs (Dynamic) -->
+                <div id="studentTabsContainer" class="flex flex-wrap bg-white/80 p-1.5 rounded-2xl shadow-inner border border-amber-200/50 gap-1">
+                    <!-- Injected via JS -->
+                </div>
+            </div>
+
+            <!-- Practice / Test Mode Actions Bar -->
+            <div class="flex items-center justify-between bg-white p-4 rounded-2xl border border-amber-200 shadow-sm">
+                <div class="flex items-center gap-2">
+                    <span id="activeModeIndicator" class="text-sm font-bold text-stone-700">📋 מצב אימון רגיל</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button id="startTestModeBtn" onclick="startTestMode()" class="px-4 py-2 bg-gradient-to-r from-indigo-500 to-purple-500 text-white font-bold rounded-xl text-sm shadow hover:from-indigo-600 hover:to-purple-600 transition-all flex items-center gap-1.5">
+                        <i data-lucide="award" class="w-4 h-4"></i> התחל מצב מבחן 🏆
+                    </button>
+                    <button id="exitTestModeBtn" onclick="exitTestMode()" class="hidden px-4 py-2 bg-stone-200 text-stone-700 font-bold rounded-xl text-sm hover:bg-stone-300 transition-all">
+                        יציאה ממצב מבחן ↩️
+                    </button>
+                </div>
+            </div>
+
+            <!-- NORMAL PRACTICE WORDS GRID -->
+            <div id="studentWordsGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <!-- Injected via JS -->
+            </div>
+
+            <!-- TEST MODE CONTAINER -->
+            <div id="testModeContainer" class="hidden bg-white p-8 rounded-3xl border border-indigo-200 shadow-md space-y-6 text-center max-w-xl mx-auto">
+                <!-- Injected via JS -->
+            </div>
+        </div>
+
+        <!-- ADMIN / PARENT VIEW -->
+        <div id="adminView" class="hidden space-y-6">
+            <div class="bg-white p-6 rounded-3xl border border-stone-200 shadow-sm space-y-6">
+                <div class="flex items-center justify-between border-b pb-4">
+                    <div>
+                        <h2 class="text-xl font-bold text-stone-800">ניהול הכתבות וילדים</h2>
+                        <p class="text-xs text-stone-500 mt-0.5">הוסף ילדים, הגדר מילים, הקלט קול משפחתי או נكد אוטומטית</p>
+                    </div>
+                </div>
+
+                <!-- Children Manager Section -->
+                <div class="bg-stone-50 p-4 rounded-2xl border border-stone-200 space-y-4">
+                    <h3 class="text-sm font-bold text-stone-800 flex items-center gap-2">
+                        <i data-lucide="users" class="w-4 h-4"></i> ניהול ילדים ומשתמשים
+                    </h3>
+                    <div class="flex flex-wrap gap-2 items-center" id="adminChildrenTags">
+                        <!-- Injected via JS -->
+                    </div>
+                    <div class="flex flex-wrap gap-2 pt-2 items-center">
+                        <input type="text" id="newChildNameInput" placeholder="שם הילד (לדוגמה: תומר)" class="px-3 py-2.5 rounded-xl border border-stone-300 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 flex-grow">
+                        
+                        <!-- Emoji Dropdown Selection -->
+                        <select id="newChildEmojiSelect" class="px-3 py-2.5 rounded-xl border border-stone-300 bg-white text-base focus:outline-none focus:ring-2 focus:ring-amber-500">
+                            <option value="👦🏻">👦🏻 ילד</option>
+                            <option value="👧🏻">👧🏻 ילדה</option>
+                            <option value="🧒🏼">🧒🏼 ילד/ה</option>
+                            <option value="👶🏼">👶🏼 תינוק/ת</option>
+                            <option value="🦸‍♂️">🦸‍♂️ גיבור על</option>
+                            <option value="🦸‍♀️">🦸‍♀️ גיבורת על</option>
+                            <option value="🚀">🚀 חללית</option>
+                            <option value="⭐">⭐ כוכב</option>
+                            <option value="⚽">⚽ כדור</option>
+                            <option value="🐱">🐱 חתול</option>
+                            <option value="🐶">🐶 כלב</option>
+                            <option value="🎨">🎨 צבעים</option>
+                        </select>
+
+                        <button onclick="addNewChild()" class="px-5 py-2.5 bg-stone-800 text-white rounded-xl text-sm font-bold hover:bg-stone-700 transition-all flex items-center gap-1 shadow-sm">
+                            <i data-lucide="plus" class="w-4 h-4"></i> הוסף ילד
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Admin Profile Selection for Words -->
+                <div class="flex items-center justify-between border-b pb-3">
+                    <h3 class="text-sm font-bold text-stone-700">ניהול מילים עבור: <span id="adminActiveProfileName" class="text-amber-700"></span></h3>
+                    <div class="flex bg-stone-100 p-1 rounded-xl flex-wrap gap-1" id="adminProfileTabs">
+                        <!-- Injected via JS -->
+                    </div>
+                </div>
+
+                <!-- Add New Word Form -->
+                <div class="bg-amber-50/50 p-4 rounded-2xl border border-amber-100 space-y-4">
+                    <h3 class="text-sm font-bold text-amber-900 flex items-center gap-2">
+                        <i data-lucide="plus-circle" class="w-4 h-4"></i> הוספת מילה או משפט חדש
+                    </h3>
+                    <div class="space-y-3">
+                        <input type="text" id="newWordInput" placeholder="הקלד מילה או משפט (לדוגמה: הכלבלב קפץ)" class="w-full px-4 py-3 rounded-xl border border-stone-300 focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white text-sm">
+                        
+                        <div class="flex flex-wrap items-center justify-between gap-2 text-xs">
+                            <div class="flex items-center gap-2">
+                                <button type="button" onclick="autoNikudInput()" class="text-amber-700 hover:text-amber-900 font-bold flex items-center gap-1 bg-amber-100/70 px-3 py-1.5 rounded-lg transition-colors shadow-sm">
+                                    <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> נקד אוטומטית ✨
+                                </button>
+                                <button type="button" onclick="openManualNikudModal()" class="text-stone-700 hover:text-stone-900 font-bold flex items-center gap-1 bg-stone-200/80 px-3 py-1.5 rounded-lg transition-colors shadow-sm">
+                                    <i data-lucide="edit-3" class="w-3.5 h-3.5"></i> ניקוד ידני מדויק 🔤
+                                </button>
+                            </div>
+                            <span class="text-stone-400">ניתן לנקד אוטומטית או ידנית אות-אות</span>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-12 gap-3 items-center pt-2 border-t border-amber-200/40">
+                        <div class="sm:col-span-7">
+                            <div id="newWordRecordSection" class="flex items-center gap-1.5 flex-wrap">
+                                <button type="button" onclick="toggleNewWordRecording()" id="newWordMicBtn" class="px-3 py-2.5 rounded-xl text-xs font-bold bg-stone-200 text-stone-700 hover:bg-stone-300 flex items-center gap-1.5 transition-all" title="הקלט קול למילה החדשה">
+                                    <i data-lucide="mic" class="w-4 h-4"></i>
+                                    <span id="newWordMicText">הקלט קול</span>
+                                </button>
+                                
+                                <div id="newWordPlaybackControls" class="hidden flex items-center gap-1 bg-emerald-50 border border-emerald-200 px-2 py-1 rounded-xl">
+                                    <button type="button" onclick="playNewWordTempAudio()" class="p-1.5 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors" title="שמע הקלטה">
+                                        <i data-lucide="play" class="w-3.5 h-3.5"></i>
+                                    </button>
+                                    <button type="button" onclick="clearNewWordTempAudio()" class="p-1.5 text-rose-600 hover:bg-rose-100 rounded-lg transition-colors" title="מחק הקלטה">
+                                        <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="sm:col-span-5 flex justify-end">
+                            <button onclick="addNewWordFromInput()" type="button" class="w-full sm:w-auto bg-gradient-to-r from-amber-500 to-orange-500 text-white font-bold py-2.5 px-6 rounded-xl text-sm shadow-md hover:from-amber-600 hover:to-orange-600 transition-all flex items-center justify-center gap-1.5">
+                                <i data-lucide="plus" class="w-4 h-4"></i> הוסף מילה לרשימה
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Word List Table / Manager -->
+                <div class="space-y-3">
+                    <h3 class="text-sm font-bold text-stone-700">רשימת המילים הנוכחית (<span id="adminWordCount">0</span> מילים)</h3>
+                    <div id="adminWordListContainer" class="space-y-2 max-h-80 overflow-y-auto pr-1">
+                        <!-- Injected via JS -->
+                    </div>
+                </div>
+
+                <!-- Save / Reset Actions -->
+                <div class="flex items-center justify-between pt-4 border-t">
+                    <button onclick="resetToDefaults()" class="text-xs text-rose-600 hover:underline flex items-center gap-1 font-medium">
+                        <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i> איפוס כל הנתונים לברירת מחדל
+                    </button>
+                    <button onclick="saveAndSwitchToStudent()" class="px-6 py-2.5 bg-stone-900 text-white rounded-xl text-sm font-bold hover:bg-stone-800 transition-all shadow-sm">
+                        שמור וחזור למסך תלמיד ✨
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="py-4 text-center text-xs text-stone-400 border-t border-stone-100 mt-auto">
+        הוכן ע״י רז אבוחצירה - 0528414129
+    </footer>
+
+    <!-- Manual Nikud Modal / Overlay -->
+    <div id="manualNikudModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl max-w-2xl w-full p-6 shadow-2xl border border-amber-200 space-y-6">
+            <div class="flex items-center justify-between border-b pb-4">
+                <div>
+                    <h3 class="text-lg font-bold text-amber-900">ניקוד ידני אות-אות 🔤</h3>
+                    <p class="text-xs text-stone-500">בחר סימן ניקוד לכל אות ואות בנפרד</p>
+                </div>
+                <button onclick="closeManualNikudModal()" class="p-2 text-stone-400 hover:text-stone-700 rounded-full">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <div id="manualNikudContainer" class="flex flex-wrap gap-3 items-center justify-center bg-stone-50 p-6 rounded-2xl border border-stone-200 min-h-[140px] overflow-x-auto">
+                <!-- Injected via JS -->
+            </div>
+
+            <div class="flex items-center justify-end gap-3 pt-4 border-t">
+                <button onclick="closeManualNikudModal()" class="px-5 py-2.5 rounded-xl text-sm font-bold bg-stone-200 text-stone-700 hover:bg-stone-300">ביטול</button>
+                <button onclick="applyManualNikud()" class="px-6 py-2.5 rounded-xl text-sm font-bold bg-amber-600 text-white hover:bg-amber-700 shadow-sm">שמור ניקוד והחזר לטופס ✨</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript Application Logic -->
+    <script>
+        let appData = {
+            activeStudent: 'alon',
+            currentMode: 'student',
+            adminProfile: 'alon',
+            isTestMode: false,
+            testCurrentIndex: 0,
+            testResults: {},
+            testRevealedCurrent: false,
+            children: [
+                { id: 'alon', name: 'אלון', emoji: '👦🏻' },
+                { id: 'hadar', name: 'הדר', emoji: '👧🏻' }
+            ],
+            lists: {
+                alon: [
+                    { id: 1, text: "הַכְּלַבְלַב קָפַץ בֶּחָצֵר" },
+                    { id: 2, text: "מְכוֹנִית הַמַּשָּׂא הִגִּיעָה" },
+                    { id: 3, text: "יְלָדִים מְשַׂחֲקִים בַּהַפְסָקָה" }
+                ],
+                hadar: [
+                    { id: 1, text: "אַבָּא בָּא" },
+                    { id: 2, text: "יֶלֶד טוֹב" },
+                    { id: 3, text: "פְּרַח זָהָב" }
+                ]
+            },
+            studentProgress: {
+                alon: {},
+                hadar: {}
+            }
+        };
+
+        try {
+            const saved = localStorage.getItem('alon_hadar_dictation_data_v6');
+            if (saved) {
+                appData = JSON.parse(saved);
+                if (!appData.children) {
+                    appData.children = [
+                        { id: 'alon', name: 'אלון', emoji: '👦🏻' },
+                        { id: 'hadar', name: 'הדר', emoji: '👧🏻' }
+                    ];
+                }
+            }
+        } catch (e) {
+            console.error('Could not load local storage data', e);
+        }
+
+        function saveData() {
+            try {
+                localStorage.setItem('alon_hadar_dictation_data_v6', JSON.stringify(appData));
+            } catch (e) {
+                console.error('Could not save data', e);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            if (!appData.children.some(c => c.id === appData.activeStudent)) {
+                appData.activeStudent = appData.children[0]?.id || 'alon';
+            }
+            if (!appData.children.some(c => c.id === appData.adminProfile)) {
+                appData.adminProfile = appData.children[0]?.id || 'alon';
+            }
+            renderApp();
+        });
+
+        function renderApp() {
+            const studentView = document.getElementById('studentView');
+            const adminView = document.getElementById('adminView');
+            const modeToggleBtn = document.getElementById('modeToggleBtn');
+            const modeBtnText = document.getElementById('modeBtnText');
+
+            if (appData.currentMode === 'student') {
+                studentView.classList.remove('hidden');
+                adminView.classList.add('hidden');
+                modeBtnText.textContent = 'מצב הורים (עריכה)';
+                modeToggleBtn.className = 'flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all shadow-sm bg-amber-500 text-white hover:bg-amber-600';
+                renderStudentView();
+            } else {
+                studentView.classList.add('hidden');
+                adminView.classList.remove('hidden');
+                modeBtnText.textContent = 'חזרה לתרגול תלמיד';
+                modeToggleBtn.className = 'flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all shadow-sm bg-emerald-600 text-white hover:bg-emerald-700';
+                renderAdminView();
+            }
+            lucide.createIcons();
+        }
+
+        function toggleMode() {
+            appData.currentMode = appData.currentMode === 'student' ? 'admin' : 'student';
+            appData.isTestMode = false;
+            renderApp();
+        }
+
+        function switchStudent(studentKey) {
+            appData.activeStudent = studentKey;
+            appData.isTestMode = false;
+            renderStudentView();
+        }
+
+        // --- STUDENT VIEW & TEST MODE LOGIC ---
+        function renderStudentView() {
+            const currentChild = appData.children.find(c => c.id === appData.activeStudent) || appData.children[0];
+            const titleEl = document.getElementById('activeStudentTitle');
+            titleEl.textContent = `שלום ${currentChild ? currentChild.name : ''}! ${currentChild ? currentChild.emoji : ''}`;
+
+            // Render Tabs
+            const tabsContainer = document.getElementById('studentTabsContainer');
+            tabsContainer.innerHTML = '';
+            appData.children.forEach(child => {
+                const isActive = child.id === appData.activeStudent;
+                const btn = document.createElement('button');
+                btn.onclick = () => switchStudent(child.id);
+                btn.className = `px-4 py-2 rounded-xl text-sm font-bold transition-all shadow-sm ${isActive ? 'bg-amber-500 text-white' : 'text-stone-600 hover:text-amber-800'}`;
+                btn.innerHTML = `${child.emoji} ${child.name}`;
+                tabsContainer.appendChild(btn);
+            });
+
+            const words = appData.lists[appData.activeStudent] || [];
+            const gridEl = document.getElementById('studentWordsGrid');
+            const testContainer = document.getElementById('testModeContainer');
+            const startTestBtn = document.getElementById('startTestModeBtn');
+            const exitTestBtn = document.getElementById('exitTestModeBtn');
+            const modeIndicator = document.getElementById('activeModeIndicator');
+
+            if (words.length === 0) {
+                gridEl.innerHTML = `
+                    <div class="col-span-1 sm:col-span-2 text-center py-12 bg-white rounded-3xl border border-stone-200 shadow-sm">
+                        <p class="text-stone-500 mb-2">אין עדיין מילים ברשימה השבועית עבור ${currentChild ? currentChild.name : ''}.</p>
+                        <button onclick="toggleMode()" class="text-amber-700 font-bold text-sm hover:underline">עבור למצב הורים והוסף מילים</button>
+                    </div>
+                `;
+                startTestBtn.classList.add('hidden');
+                testContainer.classList.add('hidden');
+                return;
+            }
+
+            if (appData.isTestMode) {
+                gridEl.classList.add('hidden');
+                testContainer.classList.remove('hidden');
+                startTestBtn.classList.add('hidden');
+                exitTestBtn.classList.remove('hidden');
+                modeIndicator.textContent = '🏆 מצב מבחן פעיל';
+                renderTestModeStep();
+                return;
+            } else {
+                gridEl.classList.remove('hidden');
+                testContainer.classList.add('hidden');
+                startTestBtn.classList.remove('hidden');
+                exitTestBtn.classList.add('hidden');
+                modeIndicator.textContent = '📋 מצב אימון רגיל';
+            }
+
+            gridEl.innerHTML = '';
+            const progress = appData.studentProgress[appData.activeStudent] || {};
+
+            words.forEach((item, index) => {
+                const wordNum = index + 1;
+                const isRevealed = progress[item.id]?.revealed || false;
+
+                const card = document.createElement('div');
+                card.className = `bg-white p-5 rounded-3xl border transition-all shadow-sm flex flex-col justify-between gap-4 ${isRevealed ? 'border-emerald-300 bg-emerald-50/20' : 'border-amber-200/80 hover:border-amber-400'}`;
+                
+                card.innerHTML = `
+                    <div class="flex items-center justify-between">
+                        <span class="w-10 h-10 rounded-2xl bg-amber-100 text-amber-900 font-black text-base flex items-center justify-center shadow-inner">
+                            ${wordNum}
+                        </span>
+                        <button onclick="playWordAudio(${item.id})" class="flex items-center gap-2 bg-gradient-to-r from-amber-500 to-orange-500 text-white px-5 py-3 rounded-2xl text-base font-bold shadow-md hover:from-amber-600 hover:to-orange-600 active:scale-95 transition-all">
+                            <i data-lucide="ear" class="w-5 h-5"></i>
+                            שמע מילה
+                        </button>
+                    </div>
+
+                    <div class="space-y-3 pt-3 border-t border-stone-100">
+                        <div class="flex items-center justify-between">
+                            <button onclick="toggleReveal(${item.id})" class="text-sm font-bold text-stone-700 hover:text-amber-700 flex items-center gap-2 bg-stone-100 px-4 py-2.5 rounded-xl transition-colors">
+                                <i data-lucide="${isRevealed ? 'eye-off' : 'eye'}" class="w-4 h-4"></i>
+                                ${isRevealed ? 'הסתר מילה' : 'חשוף מילה לבדיקה'}
+                            </button>
+                        </div>
+                        <div class="p-4 rounded-2xl bg-stone-50 border border-stone-200/60 min-h-[50px] flex items-center justify-center">
+                            <span class="text-xl font-black tracking-wide ${isRevealed ? 'text-amber-900' : 'text-stone-300 select-none'}">
+                                ${isRevealed ? escapeHtml(item.text) : '• • • • • • • • •'}
+                            </span>
+                        </div>
+                    </div>
+                `;
+                gridEl.appendChild(card);
+            });
+            lucide.createIcons();
+        }
+
+        function toggleReveal(wordId) {
+            const student = appData.activeStudent;
+            if (!appData.studentProgress[student]) appData.studentProgress[student] = {};
+            if (!appData.studentProgress[student][wordId]) appData.studentProgress[student][wordId] = {};
+            const current = appData.studentProgress[student][wordId].revealed || false;
+            appData.studentProgress[student][wordId].revealed = !current;
+            saveData();
+            renderStudentView();
+        }
+
+        // --- TEST MODE FUNCTIONS ---
+        function startTestMode() {
+            appData.isTestMode = true;
+            appData.testCurrentIndex = 0;
+            appData.testResults = {};
+            appData.testRevealedCurrent = false;
+            renderStudentView();
+        }
+
+        function exitTestMode() {
+            appData.isTestMode = false;
+            renderStudentView();
+        }
+
+        function toggleTestReveal() {
+            appData.testRevealedCurrent = !appData.testRevealedCurrent;
+            renderTestModeStep();
+        }
+
+        function renderTestModeStep() {
+            const words = appData.lists[appData.activeStudent] || [];
+            const container = document.getElementById('testModeContainer');
+
+            if (appData.testCurrentIndex >= words.length) {
+                renderTestSummary(container, words);
+                return;
+            }
+
+            const currentWord = words[appData.testCurrentIndex];
+            const total = words.length;
+            const currentNum = appData.testCurrentIndex + 1;
+            const isRevealed = appData.testRevealedCurrent;
+
+            container.innerHTML = `
+                <div class="space-y-6">
+                    <div class="flex items-center justify-between text-xs text-stone-500 font-bold border-b pb-3">
+                        <span>מבחן הגשה 🏆</span>
+                        <span class="px-3 py-1 bg-indigo-100 text-indigo-800 rounded-full">שאלה ${currentNum} מתוך ${total}</span>
+                    </div>
+
+                    <div class="py-2 space-y-3">
+                        <h3 class="text-lg font-bold text-stone-800">הקשיבו היטב למילה וכתבו במחברת:</h3>
+                        
+                        <!-- 1. Play Audio Button -->
+                        <button onclick="playWordAudio(${currentWord.id})" class="mx-auto flex items-center gap-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-8 py-4 rounded-2xl text-lg font-black shadow-lg hover:from-indigo-700 hover:to-purple-700 active:scale-95 transition-all">
+                            <i data-lucide="ear" class="w-6 h-6"></i>
+                            שמע מילה למבחן 🎧
+                        </button>
+
+                        <!-- 2. Reveal Word Button -->
+                        <div class="pt-2">
+                            <button onclick="toggleTestReveal()" class="mx-auto text-xs font-bold text-indigo-700 hover:text-indigo-900 flex items-center gap-1.5 bg-indigo-50 border border-indigo-200 px-4 py-2 rounded-xl transition-all shadow-sm">
+                                <i data-lucide="${isRevealed ? 'eye-off' : 'eye'}" class="w-4 h-4"></i>
+                                ${isRevealed ? 'הסתר מילה' : 'חשוף מילה לבדיקה 👁️'}
+                            </button>
+                            <div class="mt-2 p-3 rounded-2xl bg-stone-50 border border-stone-200/60 min-h-[45px] flex items-center justify-center max-w-sm mx-auto">
+                                <span class="text-base font-black tracking-wide ${isRevealed ? 'text-indigo-900' : 'text-stone-300 select-none'}">
+                                    ${isRevealed ? escapeHtml(currentWord.text) : '• • • • • • • • •'}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 3. Success / Mistake Feedback Buttons -->
+                    <div class="bg-stone-50 p-4 rounded-2xl border border-stone-200 space-y-3 pt-2">
+                        <p class="text-xs text-stone-600 font-medium">האם הצלחת לכתוב את המילה נכון במחברת?</p>
+                        <div class="flex gap-3 justify-center">
+                            <button onclick="recordTestAnswer(${currentWord.id}, true)" class="flex-1 py-3 px-4 bg-emerald-600 text-white font-bold rounded-xl shadow hover:bg-emerald-700 transition-all flex items-center justify-center gap-2">
+                                <i data-lucide="check-circle" class="w-5 h-5"></i> הצלחתי נכון! 🎉
+                            </button>
+                            <button onclick="recordTestAnswer(${currentWord.id}, false)" class="flex-1 py-3 px-4 bg-rose-500 text-white font-bold rounded-xl shadow hover:bg-rose-600 transition-all flex items-center justify-center gap-2">
+                                <i data-lucide="x-circle" class="w-5 h-5"></i> הייתה לי טעות 😅
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            lucide.createIcons();
+        }
+
+        function recordTestAnswer(wordId, isCorrect) {
+            appData.testResults[wordId] = isCorrect;
+            appData.testRevealedCurrent = false; // Reset reveal for next word
+            if (isCorrect) {
+                confetti({
+                    particleCount: 80,
+                    spread: 70,
+                    origin: { y: 0.6 }
+                });
+            }
+            appData.testCurrentIndex++;
+            renderStudentView();
+        }
+
+        function renderTestSummary(container, words) {
+            const results = appData.testResults;
+            const correctCount = Object.values(results).filter(val => val === true).length;
+            const total = words.length;
+            const mistakes = words.filter(w => results[w.id] === false);
+
+            container.innerHTML = `
+                <div class="space-y-6 text-right">
+                    <div class="text-center space-y-2">
+                        <span class="text-4xl">🌟</span>
+                        <h2 class="text-2xl font-black text-indigo-900">כל הכבוד על סיום המבחן!</h2>
+                        <p class="text-sm text-stone-600">הצלחת ב-<span class="font-bold text-indigo-700">${correctCount}</span> מתוך <span class="font-bold">${total}</span> מילים.</p>
+                    </div>
+
+                    ${mistakes.length > 0 ? `
+                        <div class="bg-rose-50 border border-rose-200 p-4 rounded-2xl space-y-3">
+                            <h4 class="text-sm font-bold text-rose-900 flex items-center gap-1.5">
+                                <i data-lucide="alert-circle" class="w-4 h-4"></i> מילים שכדאי לחזור עליהן שוב:
+                            </h4>
+                            <div class="space-y-2">
+                                ${mistakes.map(m => `
+                                    <div class="flex items-center justify-between bg-white px-4 py-2.5 rounded-xl border border-rose-100 shadow-sm">
+                                        <span class="text-base font-black text-stone-800">${escapeHtml(m.text)}</span>
+                                        <button onclick="playWordAudio(${m.id})" class="px-3 py-1 bg-amber-100 text-amber-900 rounded-lg text-xs font-bold hover:bg-amber-200 flex items-center gap-1">
+                                            <i data-lucide="volume-2" class="w-3.5 h-3.5"></i> שמע שוב
+                                        </button>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    ` : `
+                        <div class="bg-emerald-50 border border-emerald-200 p-6 rounded-2xl text-center space-y-2">
+                            <span class="text-3xl">🏆</span>
+                            <h4 class="text-base font-bold text-emerald-900">מושלם! אין טעויות בכלל!</h4>
+                            <p class="text-xs text-emerald-700">עשית עבודה נפלאה!</p>
+                        </div>
+                    `}
+
+                    <div class="flex flex-wrap gap-3 pt-2">
+                        <button onclick="resetTestAndRetry()" class="flex-1 py-3 bg-indigo-600 text-white font-bold rounded-xl text-sm shadow hover:bg-indigo-700 transition-all flex items-center justify-center gap-1.5">
+                            <i data-lucide="rotate-ccw" class="w-4 h-4"></i> איפוס ובצע מבחן חוזר 🔄
+                        </button>
+                        <button onclick="exitTestMode()" class="px-6 py-3 bg-stone-200 text-stone-700 font-bold rounded-xl text-sm hover:bg-stone-300 transition-all">
+                            חזרה למסך הראשי
+                        </button>
+                    </div>
+                </div>
+            `;
+            lucide.createIcons();
+            if (mistakes.length === 0) {
+                confetti({
+                    particleCount: 150,
+                    spread: 100,
+                    origin: { y: 0.5 }
+                });
+            }
+        }
+
+        function resetTestAndRetry() {
+            appData.testCurrentIndex = 0;
+            appData.testResults = {};
+            appData.testRevealedCurrent = false;
+            renderStudentView();
+        }
+
+        // --- ADMIN / PARENT VIEW LOGIC ---
+        function setAdminProfile(profile) {
+            appData.adminProfile = profile;
+            renderAdminView();
+        }
+
+        function addNewChild() {
+            const nameInput = document.getElementById('newChildNameInput');
+            const emojiSelect = document.getElementById('newChildEmojiSelect');
+            const name = nameInput.value.trim();
+            const emoji = emojiSelect.value;
+
+            if (!name) {
+                alert('אנא הזן שם ילד תקין.');
+                return;
+            }
+
+            const id = 'child_' + Date.now();
+            appData.children.push({ id, name, emoji });
+            appData.lists[id] = [];
+            appData.studentProgress[id] = {};
+
+            nameInput.value = '';
+            emojiSelect.selectedIndex = 0;
+            saveData();
+            renderAdminView();
+        }
+
+        function deleteChild(childId) {
+            if (appData.children.length <= 1) {
+                alert('חייב להישאר לפחות ילד אחד במערכת.');
+                return;
+            }
+            if (!confirm('האם אתה בטוח שברצונך למחוק את הילד וכל המילים שלו?')) return;
+
+            appData.children = appData.children.filter(c => c.id !== childId);
+            delete appData.lists[childId];
+            delete appData.studentProgress[childId];
+
+            if (appData.activeStudent === childId) {
+                appData.activeStudent = appData.children[0].id;
+            }
+            if (appData.adminProfile === childId) {
+                appData.adminProfile = appData.children[0].id;
+            }
+
+            saveData();
+            renderAdminView();
+        }
+
+        function renderAdminView() {
+            const tagsContainer = document.getElementById('adminChildrenTags');
+            tagsContainer.innerHTML = '';
+            appData.children.forEach(child => {
+                const tag = document.createElement('div');
+                tag.className = 'flex items-center gap-2 bg-white px-3 py-1.5 rounded-xl border border-stone-200 shadow-sm text-sm';
+                tag.innerHTML = `
+                    <span>${child.emoji}</span>
+                    <span class="font-bold text-stone-800">${child.name}</span>
+                    ${appData.children.length > 1 ? `<button onclick="deleteChild('${child.id}')" class="text-stone-400 hover:text-rose-600 mr-1"><i data-lucide="x" class="w-3.5 h-3.5"></i></button>` : ''}
+                `;
+                tagsContainer.appendChild(tag);
+            });
+
+            const profileTabs = document.getElementById('adminProfileTabs');
+            profileTabs.innerHTML = '';
+            if (!appData.children.some(c => c.id === appData.adminProfile)) {
+                appData.adminProfile = appData.children[0]?.id || '';
+            }
+            const activeChildObj = appData.children.find(c => c.id === appData.adminProfile);
+            document.getElementById('adminActiveProfileName').textContent = activeChildObj ? `${activeChildObj.emoji} ${activeChildObj.name}` : '';
+
+            appData.children.forEach(child => {
+                const isSel = child.id === appData.adminProfile;
+                const btn = document.createElement('button');
+                btn.onclick = () => setAdminProfile(child.id);
+                btn.className = `px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${isSel ? 'bg-white text-amber-800 shadow-sm' : 'text-stone-600'}`;
+                btn.innerHTML = `${child.emoji} ${child.name}`;
+                profileTabs.appendChild(btn);
+            });
+
+            const words = appData.lists[appData.adminProfile] || [];
+            document.getElementById('adminWordCount').textContent = words.length;
+            const container = document.getElementById('adminWordListContainer');
+            container.innerHTML = '';
+
+            if (words.length === 0) {
+                container.innerHTML = `<p class="text-xs text-stone-400 text-center py-4">אין עדיין מילים ברשימה זו.</p>`;
+                lucide.createIcons();
+                return;
+            }
+
+            words.forEach((item, index) => {
+                const hasRecording = !!(item.audioData && item.audioData.startsWith('data:audio'));
+                const isRecordingThis = window.activeRecordingWordId === item.id;
+                
+                const row = document.createElement('div');
+                row.className = 'flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 bg-stone-50 rounded-xl border border-stone-200/80 gap-3';
+                row.innerHTML = `
+                    <div class="flex items-center gap-3 flex-grow w-full sm:w-auto">
+                        <span class="w-6 h-6 rounded-full bg-amber-200 text-amber-900 font-bold text-xs flex items-center justify-center shrink-0">${index + 1}</span>
+                        <input type="text" value="${escapeHtml(item.text)}" onchange="updateWordText(${item.id}, this.value)" class="w-full bg-white px-3 py-1.5 rounded-lg border border-stone-200 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-amber-500">
+                    </div>
+                    <div class="flex items-center gap-1.5 self-end sm:self-center shrink-0">
+                        ${isRecordingThis ? `
+                            <button onclick="stopActiveRecording()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-rose-600 text-white animate-pulse shadow-sm">
+                                <i data-lucide="square" class="w-3.5 h-3.5"></i>
+                                <span>עצור הקלטה ⏹️</span>
+                            </button>
+                        ` : `
+                            <button onclick="startActiveRecording(${item.id})" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-bold transition-colors ${hasRecording ? 'bg-emerald-100 text-emerald-800 hover:bg-emerald-200' : 'bg-stone-200 text-stone-700 hover:bg-stone-300'}">
+                                <i data-lucide="mic" class="w-3.5 h-3.5"></i>
+                                <span>${hasRecording ? 'הקלטה קיימת 🎙️' : 'הקלט קול'}</span>
+                            </button>
+                        `}
+                        
+                        ${hasRecording ? `
+                            <button onclick="playWordAudio(${item.id})" class="p-2 text-emerald-700 hover:bg-emerald-100 rounded-lg transition-colors" title="שמע הקלטה">
+                                <i data-lucide="play" class="w-4 h-4"></i>
+                            </button>
+                            <button onclick="deleteRecording(${item.id})" class="p-2 text-stone-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors" title="מחק הקלטה">
+                                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                            </button>
+                        ` : ''}
+
+                        <button onclick="deleteWord(${item.id})" class="p-2 text-stone-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors mr-2 border-r border-stone-200" title="מחק מילה">
+                            <i data-lucide="x" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                `;
+                container.appendChild(row);
+            });
+            lucide.createIcons();
+        }
+
+        function updateWordText(id, newText) {
+            const profile = appData.adminProfile;
+            const item = appData.lists[profile].find(w => w.id === id);
+            if (item) {
+                item.text = newText;
+                saveData();
+            }
+        }
+
+        function deleteWord(id) {
+            const profile = appData.adminProfile;
+            appData.lists[profile] = appData.lists[profile].filter(w => w.id !== id);
+            saveData();
+            renderAdminView();
+        }
+
+        function deleteRecording(id) {
+            const profile = appData.adminProfile;
+            const item = appData.lists[profile].find(w => w.id === id);
+            if (item) {
+                delete item.audioData;
+                if (window.activeAudioBlobs && window.activeAudioBlobs[id]) {
+                    delete window.activeAudioBlobs[id];
+                }
+                saveData();
+                renderAdminView();
+            }
+        }
+
+        function saveAndSwitchToStudent() {
+            saveData();
+            appData.currentMode = 'student';
+            renderApp();
+        }
+
+        function resetToDefaults() {
+            if (!confirm('האם אתה בטוח שברצונך לאפס את כל הנתונים לברירת המחדל?')) return;
+            appData = {
+                activeStudent: 'alon',
+                currentMode: 'student',
+                adminProfile: 'alon',
+                isTestMode: false,
+                testCurrentIndex: 0,
+                testResults: {},
+                testRevealedCurrent: false,
+                children: [
+                    { id: 'alon', name: 'אלון', emoji: '👦🏻' },
+                    { id: 'hadar', name: 'הדר', emoji: '👧🏻' }
+                ],
+                lists: {
+                    alon: [
+                        { id: 1, text: "הַכְּלַבְלַב קָפַץ בֶּחָצֵר" },
+                        { id: 2, text: "מְכוֹנִית הַמַּשָּׂא הִגִּיעָה" },
+                        { id: 3, text: "יְלָדִים מְשַׂחֲקִים בַּהַפְסָקָה" }
+                    ],
+                    hadar: [
+                        { id: 1, text: "אַבָּא בָּא" },
+                        { id: 2, text: "יֶלֶד טוֹב" },
+                        { id: 3, text: "פְּרַח זָהָב" }
+                    ]
+                },
+                studentProgress: {
+                    alon: {},
+                    hadar: {}
+                }
+            };
+            saveData();
+            renderApp();
+        }
+
+        // --- RECORDING & NIKUD LOGIC ---
+        let mediaRecorderInstance = null;
+        let audioChunksGlobal = [];
+        window.activeAudioBlobs = {};
+        
+        let newWordTempAudioBlob = null;
+        let newWordTempBase64 = null;
+        let newWordMediaRecorder = null;
+        let newWordChunks = [];
+        let isNewWordRecordingActive = false;
+
+        let manualNikudLetters = [];
+
+        function openManualNikudModal() {
+            const input = document.getElementById('newWordInput');
+            const val = input.value.trim();
+            if (!val) {
+                alert('אנא הקלד תחילה מילה או משפט בשדה הטקסט.');
+                return;
+            }
+
+            const cleanVal = val.replace(/[\u0591-\u05C7]/g, '');
+            manualNikudLetters = [];
+
+            for (let i = 0; i < cleanVal.length; i++) {
+                const char = cleanVal[i];
+                if (char === ' ') {
+                    manualNikudLetters.push({ char: ' ', nikud: '' });
+                } else {
+                    manualNikudLetters.push({ char: char, nikud: '' });
+                }
+            }
+
+            renderManualNikudBuilder();
+            document.getElementById('manualNikudModal').classList.remove('hidden');
+            lucide.createIcons();
+        }
+
+        function closeManualNikudModal() {
+            document.getElementById('manualNikudModal').classList.add('hidden');
+        }
+
+        function renderManualNikudBuilder() {
+            const container = document.getElementById('manualNikudContainer');
+            container.innerHTML = '';
+
+            const nikudOptions = [
+                { label: 'ללא ניקוד', value: '' },
+                { label: 'פתח ַ (א)', value: '\u05B7' },
+                { label: 'קמץ ָ (א)', value: '\u05B8' },
+                { label: 'חטף פתח ֲ', value: '\u05B3' },
+                { label: 'חטף קמץ ֳ', value: '\u05B2' },
+                { label: 'שבע / שווא ְ', value: '\u05B0' },
+                { label: 'חיריק ִ', value: '\u05B5' },
+                { label: 'צירי ֵ', value: '\u05B4' },
+                { label: 'סגול ֶ', value: '\u05B6' },
+                { label: 'חולם ֹ', value: '\u05B9' },
+                { label: 'קובוץ / שורוק ֻ', value: '\u05BB' },
+                { label: 'דגש ּ', value: '\u05BC' }
+            ];
+
+            manualNikudLetters.forEach((item, index) => {
+                if (item.char === ' ') {
+                    const spaceDiv = document.createElement('div');
+                    spaceDiv.className = 'w-6 h-12';
+                    container.appendChild(spaceDiv);
+                    return;
+                }
+
+                const box = document.createElement('div');
+                box.className = 'flex flex-col items-center bg-white p-3 rounded-2xl border border-stone-200 shadow-sm gap-2';
+                
+                box.innerHTML = `
+                    <span class="text-2xl font-black text-amber-900 h-10 flex items-center">${item.char}${item.nikud}</span>
+                    <select onchange="updateLetterNikud(${index}, this.value)" class="text-xs bg-stone-100 border border-stone-300 rounded-lg px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-amber-500">
+                        ${nikudOptions.map(opt => `<option value="${opt.value}" ${item.nikud === opt.value ? 'selected' : ''}>${opt.label}</option>`).join('')}
+                    </select>
+                `;
+                container.appendChild(box);
+            });
+        }
+
+        function updateLetterNikud(index, nikudVal) {
+            manualNikudLetters[index].nikud = nikudVal;
+            const container = document.getElementById('manualNikudContainer');
+            const boxes = container.children;
+            let boxIdx = 0;
+            for (let i = 0; i <= index; i++) {
+                if (manualNikudLetters[i].char !== ' ') {
+                    if (i === index) {
+                        const span = boxes[boxIdx].querySelector('span');
+                        span.textContent = manualNikudLetters[index].char + manualNikudLetters[index].nikud;
+                    }
+                    boxIdx++;
+                }
+            }
+        }
+
+        function applyManualNikud() {
+            let finalStr = '';
+            manualNikudLetters.forEach(item => {
+                finalStr += item.char + item.nikud;
+            });
+            document.getElementById('newWordInput').value = finalStr;
+            closeManualNikudModal();
+        }
+
+        function autoNikudInput() {
+            const input = document.getElementById('newWordInput');
+            let val = input.value.trim();
+            if (!val) return;
+
+            const dictionary = {
+                "הכלבלב": "הַכְּלַבְלַב",
+                "כלבלב": "כְּלַבְלַב",
+                "קפץ": "קָפַץ",
+                "בחצר": "בֶּחָצֵר",
+                "חצר": "חָצֵר",
+                "מכונית": "מְכוֹנִית",
+                "המסה": "הַמַּשָּׂא",
+                "המשא": "הַמַּשָּׂא",
+                "משא": "מַשָּׂא",
+                "הגיעה": "הִגִּיעָה",
+                "הגיע": "הִגִּיעַ",
+                "ילדים": "יְלָדִים",
+                "ילד": "יֶלֶד",
+                "ילדה": "יַלְדָּה",
+                "משחקים": "מְשַׂחֲקִים",
+                "משחק": "מְשַׂחֵק",
+                "בהפסקה": "בַּהַפְסָקָה",
+                "הפסקה": "הַפְסָקָה",
+                "אבא": "אַבָּא",
+                "אמא": "אִמָּא",
+                "בא": "בָּא",
+                "באה": "בָּאָה",
+                "טוב": "טוֹב",
+                "טובה": "טוֹבָה",
+                "פרח": "פְּרַח",
+                "פרחים": "פְּרָחִים",
+                "זהב": "זָהָב",
+                "ספר": "סֵפֶר",
+                "מחברת": "מַחְבֶּרֶת",
+                "שולחן": "שׁוּלְחָן",
+                "בית": "בַּיִת",
+                "הבית": "הַבַּיִת",
+                "שמש": "שֶׁמֶשׁ",
+                "ירח": "יָרֵחַ",
+                "כוכב": "כּוֹכָב"
+            };
+
+            const words = val.split(' ');
+            const vocalizedWords = words.map(w => {
+                const cleanW = w.replace(/[\u0591-\u05C7]/g, '');
+                if (dictionary[cleanW]) return dictionary[cleanW];
+                return cleanW
+                    .replace(/^ה([אבגדהוזחטיכלמנסעפצקרשת])/g, 'הַ$1')
+                    .replace(/^ב([אבגדהוזחטיכלמנסעפצקרשת])/g, 'בְּ$1')
+                    .replace(/^ל([אבגדהוזחטיכלמנסעפצקרשת])/g, 'לְ$1')
+                    .replace(/^כ([אבגדהוזחטיכלמנסעפצקרשת])/g, 'כְּ$1')
+                    .replace(/^מ([אבגדהוזחטיכלמנסעפצקרשת])/g, 'מְ$1')
+                    .replace(/^ו([אבגדהוזחטיכלמנסעפצקרשת])/g, 'וְ$1');
+            });
+
+            input.value = vocalizedWords.join(' ');
+        }
+
+        function toggleNewWordRecording() {
+            if (!isNewWordRecordingActive) {
+                startNewWordRecording();
+            } else {
+                stopNewWordRecordingProcess();
+            }
+        }
+
+        function startNewWordRecording() {
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                alert('הדפדפן שלך אינו תומך בהקלטת שמע.');
+                return;
+            }
+
+            navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
+                newWordChunks = [];
+                let options = { mimeType: 'audio/webm' };
+                if (!MediaRecorder.isTypeSupported('audio/webm')) {
+                    if (MediaRecorder.isTypeSupported('audio/mp4')) {
+                        options = { mimeType: 'audio/mp4' };
+                    } else {
+                        options = {};
+                    }
+                }
+
+                newWordMediaRecorder = new MediaRecorder(stream, options);
+
+                newWordMediaRecorder.ondataavailable = e => {
+                    if (e.data.size > 0) newWordChunks.push(e.data);
+                };
+
+                newWordMediaRecorder.onstop = () => {
+                    newWordTempAudioBlob = new Blob(newWordChunks, { type: newWordMediaRecorder.mimeType || 'audio/webm' });
+                    const reader = new FileReader();
+                    reader.readAsDataURL(newWordTempAudioBlob);
+                    reader.onloadend = () => {
+                        newWordTempBase64 = reader.result;
+                        const micBtn = document.getElementById('newWordMicBtn');
+                        if (micBtn) {
+                            micBtn.className = 'px-3 py-3 rounded-xl text-xs font-bold bg-emerald-600 text-white flex items-center gap-1.5 transition-all shadow-sm';
+                            document.getElementById('newWordMicText').textContent = 'הקלטה מוכנה ✓';
+                            document.getElementById('newWordPlaybackControls').classList.remove('hidden');
+                        }
+                        isNewWordRecordingActive = false;
+                        lucide.createIcons();
+                    };
+                    stream.getTracks().forEach(t => t.stop());
+                };
+
+                newWordMediaRecorder.start();
+                isNewWordRecordingActive = true;
+                const micBtn = document.getElementById('newWordMicBtn');
+                if (micBtn) {
+                    micBtn.className = 'px-3 py-3 rounded-xl text-xs font-bold bg-rose-600 text-white animate-pulse flex items-center gap-1.5 transition-all shadow-sm';
+                    document.getElementById('newWordMicText').textContent = 'עצור ⏹️';
+                }
+            }).catch(err => {
+                console.error('Mic access error', err);
+                alert('לא ניתן לגשת למיקרופון. אנא ודא שהרשאת המיקרופון מאושרת בהגדרות הדפדפן.');
+            });
+        }
+
+        function stopNewWordRecordingProcess() {
+            if (newWordMediaRecorder && newWordMediaRecorder.state !== 'inactive') {
+                newWordMediaRecorder.stop();
+            }
+        }
+
+        function playNewWordTempAudio() {
+            if (newWordTempAudioBlob) {
+                const url = URL.createObjectURL(newWordTempAudioBlob);
+                const audio = new Audio(url);
+                audio.play().catch(e => console.log('Playback error', e));
+            }
+        }
+
+        function clearNewWordTempAudio() {
+            newWordTempAudioBlob = null;
+            newWordTempBase64 = null;
+            const micBtn = document.getElementById('newWordMicBtn');
+            micBtn.className = 'px-3 py-3 rounded-xl text-xs font-bold bg-stone-200 text-stone-700 hover:bg-stone-300 flex items-center gap-1.5 transition-all';
+            document.getElementById('newWordMicText').textContent = 'הקלט קול';
+            document.getElementById('newWordPlaybackControls').classList.add('hidden');
+        }
+
+        function addNewWordFromInput() {
+            const input = document.getElementById('newWordInput');
+            const val = input.value.trim();
+            if (!val) return;
+
+            const profile = appData.adminProfile;
+            const newId = Date.now();
+            
+            const newItem = { id: newId, text: val };
+            if (newWordTempBase64) {
+                newItem.audioData = newWordTempBase64;
+                if (newWordTempAudioBlob) {
+                    window.activeAudioBlobs[newId] = newWordTempAudioBlob;
+                }
+            }
+
+            if (!appData.lists[profile]) {
+                appData.lists[profile] = [];
+            }
+
+            appData.lists[profile].push(newItem);
+            
+            input.value = '';
+            clearNewWordTempAudio();
+
+            saveData();
+            renderAdminView();
+        }
+
+        function startActiveRecording(wordId) {
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                alert('הדפדפן שלך אינו תומך בהקלטת שמע.');
+                return;
+            }
+
+            navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
+                audioChunksGlobal = [];
+                
+                let options = { mimeType: 'audio/webm' };
+                if (!MediaRecorder.isTypeSupported('audio/webm')) {
+                    if (MediaRecorder.isTypeSupported('audio/mp4')) {
+                        options = { mimeType: 'audio/mp4' };
+                    } else {
+                        options = {};
+                    }
+                }
+
+                mediaRecorderInstance = new MediaRecorder(stream, options);
+
+                mediaRecorderInstance.ondataavailable = event => {
+                    if (event.data.size > 0) {
+                        audioChunksGlobal.push(event.data);
+                    }
+                };
+
+                mediaRecorderInstance.onstop = () => {
+                    const audioBlob = new Blob(audioChunksGlobal, { type: mediaRecorderInstance.mimeType || 'audio/webm' });
+                    window.activeAudioBlobs[wordId] = audioBlob;
+                    const directBlobUrl = URL.createObjectURL(audioBlob);
+
+                    const reader = new FileReader();
+                    reader.readAsDataURL(audioBlob);
+                    reader.onloadend = () => {
+                        const base64Audio = reader.result;
+                        const profile = appData.adminProfile;
+                        const item = appData.lists[profile].find(w => w.id === wordId);
+                        if (item) {
+                            item.audioData = base64Audio;
+                            saveData();
+                            renderAdminView();
+                            
+                            const testAudio = new Audio(directBlobUrl);
+                            testAudio.play().catch(err => console.log('Auto play test prevented', err));
+                        }
+                    };
+                    stream.getTracks().forEach(track => track.stop());
+                    window.activeRecordingWordId = null;
+                    renderAdminView();
+                };
+
+                mediaRecorderInstance.start();
+                window.activeRecordingWordId = wordId;
+                renderAdminView();
+            }).catch(err => {
+                console.error('Error accessing microphone', err);
+                alert('לא ניתן לגשת למיקרופון. ודא שאושרה גישה למיקרופון בדפדפן.');
+            });
+        }
+
+        function stopActiveRecording() {
+            if (mediaRecorderInstance && mediaRecorderInstance.state !== 'inactive') {
+                mediaRecorderInstance.stop();
+            }
+        }
+
+        function playWordAudio(wordId) {
+            const student = appData.activeStudent;
+            const words = appData.currentMode === 'admin' 
+                ? (appData.lists[appData.adminProfile] || [])
+                : (appData.lists[student] || []);
+                
+            const item = words.find(w => w.id === wordId);
+
+            if (!item) return;
+
+            if (window.activeAudioBlobs && window.activeAudioBlobs[wordId]) {
+                const blobUrl = URL.createObjectURL(window.activeAudioBlobs[wordId]);
+                const audio = new Audio(blobUrl);
+                audio.play().catch(e => {
+                    console.error('Error playing from Blob URL', e);
+                    playBase64AudioFallback(item);
+                });
+                return;
+            }
+
+            if (item.audioData && item.audioData.startsWith('data:audio')) {
+                try {
+                    const arr = item.audioData.split(',');
+                    const mime = arr[0].match(/:(.*?);/)[1];
+                    const bstr = atob(arr[1]);
+                    let n = bstr.length;
+                    const u8arr = new Uint8Array(n);
+                    while (n--) {
+                        u8arr[n] = bstr.charCodeAt(n);
+                    }
+                    const blob = new Blob([u8arr], { type: mime });
+                    window.activeAudioBlobs[wordId] = blob;
+                    
+                    const blobUrl = URL.createObjectURL(blob);
+                    const audio = new Audio(blobUrl);
+                    audio.play().catch(e => {
+                        console.error('Error playing converted Base64 audio', e);
+                        fallbackTTS(item.text);
+                    });
+                    return;
+                } catch (err) {
+                    console.error('Failed to parse audio base64', err);
+                }
+            }
+
+            fallbackTTS(item.text);
+        }
+
+        function playBase64AudioFallback(item) {
+            if (item.audioData) {
+                const audio = new Audio(item.audioData);
+                audio.play().catch(e => fallbackTTS(item.text));
+            } else {
+                fallbackTTS(item.text);
+            }
+        }
+
+        function fallbackTTS(text) {
+            if (!('speechSynthesis' in window)) {
+                return;
+            }
+            window.speechSynthesis.cancel();
+            
+            const cleanText = text.replace(/[\u0591-\u05C7]/g, '');
+            const utterance = new SpeechSynthesisUtterance(cleanText);
+            utterance.lang = 'he-IL';
+            utterance.rate = 0.75; 
+            utterance.pitch = 1.1;
+
+            const voices = window.speechSynthesis.getVoices();
+            const hebrewVoice = voices.find(v => v.lang.includes('he') || v.lang.includes('IW') || v.lang.includes('HE'));
+            if (hebrewVoice) {
+                utterance.voice = hebrewVoice;
+            }
+
+            window.speechSynthesis.speak(utterance);
+        }
+
+        function escapeHtml(text) {
+            const map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            };
+            return text.replace(/[&<>"']/g, function(m) { return map[m]; });
+        }
+    </script>
+</body>
+</html>
